@@ -47,6 +47,7 @@ struct config conf_template = {
     .camera_id =                       0,
     .camera_dir =                      NULL,
     .target_dir =                      NULL,
+    .directory_mode =                  S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH,
 
     /* Capture device configuration parameters */
     .video_device =                    DEF_VIDEO_DEVICE,
@@ -207,6 +208,7 @@ struct config conf_template = {
 static void malloc_strings(struct context *);
 static struct context **copy_bool(struct context **, const char *, int);
 static struct context **copy_int(struct context **, const char *, int);
+static struct context **copy_octets(struct context **, const char *, int);
 static struct context **config_camera(struct context **cnt, const char *str, int val);
 static struct context **copy_vid_ctrl(struct context **, const char *, int);
 static struct context **copy_text_double(struct context **, const char *, int);
@@ -214,6 +216,7 @@ static struct context **copy_html_output(struct context **, const char *, int);
 
 static const char *print_bool(struct context **, char **, int, unsigned int);
 static const char *print_int(struct context **, char **, int, unsigned int);
+static const char *print_octets(struct context **, char **, int, unsigned int);
 static const char *print_string(struct context **, char **, int, unsigned int);
 static const char *print_camera(struct context **, char **, int, unsigned int);
 
@@ -334,6 +337,15 @@ config_param config_params[] = {
     CONF_OFFSET(target_dir),
     copy_string,
     print_string,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "directory_mode",
+    "# Mode for automatically created directories",
+    0,
+    CONF_OFFSET(directory_mode),
+    copy_octets,
+    print_octets,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -2218,7 +2230,7 @@ void conf_print(struct context **cnt)
             ,_("Writing config file to %s")
             ,cnt[thread]->conf_filename);
 
-        conffile = myfopen(cnt[thread]->conf_filename, "w");
+        conffile = myfopen(cnt[thread]->conf_filename, "w", 0);
 
         if (!conffile)
             continue;
@@ -2655,6 +2667,30 @@ struct context **copy_string(struct context **cnt, const char *str, int val_ptr)
 }
 
 /**
+ * copy_octets
+ *      Assigns a config option in octal format to a new integer value.
+ *      The integer is given as a string in str which is converted to integer
+ *      by the function.
+ *
+ * Returns context struct.
+ */
+static struct context **copy_octets(struct context **cnt, const char *str, int val_ptr)
+{
+    void *tmp;
+    int i;
+
+    i = -1;
+    while (cnt[++i]) {
+        tmp = (char *)cnt[i]+val_ptr;
+        *((int *)tmp) = (int) strtol(str, NULL, 8);
+        if (cnt[0]->threadnr)
+            return cnt;
+    }
+
+    return cnt;
+}
+
+/**
  * copy_vid_ctrl
  *      Assigns a new string value to a config option.
  * Returns context struct.
@@ -3000,6 +3036,32 @@ static const char *print_camera(struct context **cnt, char **str,
     *str = retval;
 
     return NULL;
+}
+
+/**
+ * print_octets
+ *      Returns a pointer to a string containing the integer of the config option value
+ *      in octal format.
+ *      If the thread number is not 0 the integer is compared with the value of the same
+ *      option in thread 0.
+ *
+ * Returns If the option is different, const char *
+ *         If the option is the same, NULL is returned which means that
+ *         the option is not written to the camera config file.
+ */
+static const char *print_octets(struct context **cnt, char **str ATTRIBUTE_UNUSED,
+                             int parm, unsigned int threadnr)
+{
+    static char retval[20];
+    int val = config_params[parm].conf_value;
+
+    if (threadnr &&
+        *(int*)((char *)cnt[threadnr] + val) == *(int*)((char *)cnt[0] + val))
+        return NULL;
+
+    sprintf(retval, "%o", *(int*)((char *)cnt[threadnr] + val));
+
+    return retval;
 }
 
 /**

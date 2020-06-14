@@ -120,7 +120,7 @@ FILE * set_logfile(const char *logfile_name)
     /* Setup temporary to let log if myfopen fails */
     set_log_mode(LOGMODE_SYSLOG);
 
-    logfile = myfopen(logfile_name, "a");
+    logfile = myfopen(logfile_name, "a", 0);
 
     /* If logfile was opened correctly */
     if (logfile)

@@ -1012,7 +1012,7 @@ static int ffmpeg_set_outputfile(struct ffmpeg *ffmpeg){
         if (!(ffmpeg->oc->oformat->flags & AVFMT_NOFILE)) {
             if (avio_open(&ffmpeg->oc->pb, ffmpeg->filename, MY_FLAG_WRITE) < 0) {
                 if (errno == ENOENT) {
-                    if (create_path(ffmpeg->filename) == -1) {
+                    if (create_path(ffmpeg->filename, 0) == -1) {
                         ffmpeg_free_context(ffmpeg);
                         return -1;
                     }

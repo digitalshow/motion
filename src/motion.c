@@ -798,7 +798,7 @@ static void init_mask_privacy(struct context *cnt){
     cnt->imgs.mask_privacy_high_uv = NULL;
 
     if (cnt->conf.mask_privacy) {
-        if ((picture = myfopen(cnt->conf.mask_privacy, "r"))) {
+        if ((picture = myfopen(cnt->conf.mask_privacy, "r", 0))) {
             MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Opening privacy mask file"));
             /*
              * NOTE: The mask is expected to have the output dimensions. I.e., the mask
@@ -1461,7 +1461,7 @@ static int motion_init(struct context *cnt)
 
     /* Load the mask file if any */
     if (cnt->conf.mask_file) {
-        if ((picture = myfopen(cnt->conf.mask_file, "r"))) {
+        if ((picture = myfopen(cnt->conf.mask_file, "r", 0))) {
             /*
              * NOTE: The mask is expected to have the output dimensions. I.e., the mask
              * applies to the already rotated image, not the capture image. Thus, use
@@ -3032,7 +3032,7 @@ static void become_daemon(void)
      * for an enter.
      */
     if (cnt_list[0]->conf.pid_file) {
-        pidf = myfopen(cnt_list[0]->conf.pid_file, "w+");
+        pidf = myfopen(cnt_list[0]->conf.pid_file, "w+", 0);
 
         if (pidf) {
             (void)fprintf(pidf, "%d\n", getpid());
@@ -3783,15 +3783,18 @@ void *myrealloc(void *ptr, size_t size, const char *desc)
  *
  * Parameters:
  *
- *   cnt  - current thread's context structure (for logging)
  *   path - the path to create
+ *   mode - the mode for newly created directories; the default of 0 is trans-
+ *          lated to 0755
  *
  * Returns: 0 on success, -1 on failure
  */
-int create_path(const char *path)
+int create_path(const char *path, mode_t mode)
 {
     char *start;
-    mode_t mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
+    if (mode == 0) {
+        mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
+    }
 
     if (path[0] == '/')
         start = strchr(path + 1, '/');
@@ -3836,7 +3839,7 @@ int create_path(const char *path)
  *
  * Returns: the file stream object
  */
-FILE * myfopen(const char *path, const char *mode)
+FILE * myfopen(const char *path, const char *mode, const mode_t dirmode)
 {
     /* first, just try to open the file */
     FILE *dummy = fopen(path, mode);
@@ -3847,7 +3850,7 @@ FILE * myfopen(const char *path, const char *mode)
     if (errno == ENOENT) {
 
         /* create path for file... */
-        if (create_path(path) == -1)
+        if (create_path(path, dirmode) == -1)
             return NULL;
 
         /* and retry opening the file */

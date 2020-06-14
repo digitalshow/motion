@@ -30,6 +30,9 @@ log_level 6
 # Target directory for pictures, snapshots and movies
 ; target_dir value
 
+# Mode for automatically created directories
+; directory_mode 0755
+
 # Video device (e.g. /dev/video0) to be used for capturing.
 videodevice /dev/video0
 

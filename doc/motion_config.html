@@ -658,6 +658,12 @@
           <td align="left"><a href="#despeckle_filter" >despeckle_filter</a></td>
         </tr>
         <tr>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#directory_mode" >directory_mode</a></td>
+        </tr>
+        <tr>
           <td align="left">emulate_motion</td>
           <td align="left">emulate_motion</td>
           <td align="left">emulate_motion</td>
@@ -1560,6 +1566,7 @@
               <td bgcolor="#edf4f9" ><a href="#camera_dir" >camera_dir</a> </td>
             </tr>
               <td bgcolor="#edf4f9" ><a href="#target_dir" >target_dir</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#directory_mode" >directory_mode</a> </td>
             <tr>
             </tr>
           </tbody>
@@ -2374,6 +2381,19 @@
         Note that the file name options are all saved relative to this target_dir
         This means in principle that you can specify target_dir as '/' and be 100% flexible. But this is
         NOT recommended.  It is recommended that this directory be specified as deep as possible.
+        <p></p>
+
+        <h3><a name="directory_mode"></a> directory_mode </h3>
+        <p></p>
+        <ul>
+          <li> Type: Integer (octal)</li>
+          <li> Range / Valid values: Unix directory modes</li>
+          <li> Default: Not defined = 0755</li>
+        </ul>
+        <p></p>
+        By default motion will create missing directories to save files in with mode 0755.
+        This option can be used to set the mode that is used for newly created directories
+        for recorded pictures. It is parsed as an octal integer.
         <p></p>
 
       </ul>

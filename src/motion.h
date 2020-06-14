@@ -537,10 +537,10 @@ extern pthread_key_t tls_key_threadnr; /* key for thread number */
 int http_bindsock(int, int, int);
 void * mymalloc(size_t);
 void * myrealloc(void *, size_t, const char *);
-FILE * myfopen(const char *, const char *);
+FILE * myfopen(const char *, const char *, const mode_t dir_mode);
 int myfclose(FILE *);
 size_t mystrftime(const struct context *, char *, size_t, const char *, const struct timeval *, const char *, int);
-int create_path(const char *);
+int create_path(const char *, mode_t mode);
 
 void util_threadname_set(const char *abbr, int threadnbr, const char *threadname);
 void util_threadname_get(char *threadname);

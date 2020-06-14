@@ -843,7 +843,7 @@ static void event_create_extpipe(struct context *cnt,
             } else if (errno ==  ENOENT) {
                 MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                     ,_("path not found, trying to create it %s ..."), cnt->conf.target_dir);
-                if (create_path(cnt->extpipefilename) == -1)
+                if (create_path(cnt->extpipefilename, 0) == -1)
                     return ;
             }
             else {
@@ -854,7 +854,7 @@ static void event_create_extpipe(struct context *cnt,
         }
 
         /* Always create any path specified as file name */
-        if (create_path(cnt->extpipefilename) == -1)
+        if (create_path(cnt->extpipefilename, 0) == -1)
             return ;
 
         mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.movie_extpipe, currenttime_tv, cnt->extpipefilename, 0);
